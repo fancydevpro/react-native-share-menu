@@ -40,10 +40,14 @@ public class ShareMenuModule extends ReactContextBaseJavaModule {
   }  
 
   @ReactMethod
-  public void getSharedText(Callback successCallback) {
+  public void getSharedText(Callback successCallback, Callback failureCallback) {
     Activity mActivity = getCurrentActivity();
     
-    if(mActivity == null) { return; }
+    if (mActivity == null) {
+      failureCallback.invoke();
+      
+      return;
+    }
     
     Intent intent = mActivity.getIntent();
     String action = intent.getAction();
@@ -53,10 +57,14 @@ public class ShareMenuModule extends ReactContextBaseJavaModule {
       if ("text/plain".equals(type)) {
         String input = intent.getStringExtra(Intent.EXTRA_TEXT);
         successCallback.invoke(input);
+        
+        return;
       } else if (type.startsWith("image/") || type.startsWith("video/")) {
         Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
         if (imageUri != null) {
           successCallback.invoke(imageUri.toString());
+          
+          return;
         }
       } else {
         Toast.makeText(mReactContext, "Type is not support", Toast.LENGTH_SHORT).show();
@@ -70,11 +78,15 @@ public class ShareMenuModule extends ReactContextBaseJavaModule {
               completeString += uri.toString() + ",";
             }
             successCallback.invoke(completeString);
+            
+            return;
           }
         } else {
           Toast.makeText(mReactContext, "Type is not support", Toast.LENGTH_SHORT).show();
         }
     }
+    
+    failureCallback.invoke();
   }
 
   @ReactMethod
